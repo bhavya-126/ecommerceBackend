@@ -10,6 +10,9 @@ module.exports = [
         auth: true,
         adminAuth: true,
         joiSchemaForSwagger: {
+            group: 'category',
+            description: 'add new category',
+            model: 'AddCategory',
             headers: {
                 authorization: Joi.string().required()
             },
@@ -25,6 +28,9 @@ module.exports = [
         auth: true,
         adminAuth: false,
         joiSchemaForSwagger: {
+            group: 'category',
+            description: 'get category',
+            model: 'get category',
             headers: {
                 authorization: Joi.string().required()
             }
@@ -83,7 +89,8 @@ module.exports = [
             headers: {
                 authorization: Joi.string().required()
             },
-            body: {
+            query: {
+                pageNo: Joi.number().required(),
                 searchTxt: Joi.string()
             }
         },

@@ -117,6 +117,10 @@ module.exports = [
             group: 'wishlist',
             description: 'get wishlist',
             model: 'Wishlist',
+            query: {
+                pageNo: Joi.number(),
+                limit: Joi.number().default(5)
+            },
             headers: {
                 authorization: Joi.string().required()
             },

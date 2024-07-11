@@ -69,16 +69,17 @@ const RESPONSE = {
         type: 'INTERNAL_SERVER_ERROR',
       };
     },
-    UNAUTHORIZED: (msg) => {
-      if (!msg) {
-        msg = '';
-      }
-      return {
+    UNAUTHORIZED: (msg, data) => {
+      let obj = {
         statusCode: 401,
-        message: msg,
         status: false,
+        message: msg || '',
         type: 'UNAUTHORIZED',
       };
+      if (data) {
+        obj = { ...obj, data };
+      }
+      return obj;
     },
   },
   SUCCESS: {

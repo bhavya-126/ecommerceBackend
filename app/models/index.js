@@ -1,5 +1,7 @@
 'use strict';
 
+const reviewModel = require('./reviewModel');
+
 
 /** ******************************
  **** Managing all the models ***
@@ -16,5 +18,6 @@ module.exports = {
   wishlistModel: require('./wishlistModel'),
   cartModel: require('./cartModel'),
   orderModel: require('./orderModel'),
-  orderDetailsModel: require('./orderDetailsModel')
+  orderDetailsModel: require('./orderDetailsModel'),
+  reviewModel: require('./reviewModel')
 };

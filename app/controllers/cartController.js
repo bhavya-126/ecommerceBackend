@@ -20,7 +20,32 @@ cartController.addToCart = async (payload) => {
 
 cartController.getCartData = async (payload) => {
     let result;
-    await dbService.find(cartModel, { userId: payload.user.userId })
+    await cartModel.find({ userId: payload.user.userId }, { _id: 0, productId: 1, quantity: 1 }).populate('productId', { name: 1, mrp: 1, discount: 1, imageUrl: 1, totalQuantity: 1 })
+
+        .then((res) => {
+            result = helpers.createSuccessResponse(MESSAGES.SUCCESS, res)
+        })
+        .catch((err) => {
+            result = helpers.createErrorResponse(err.message, ERROR_TYPES.BAD_REQUEST)
+        })
+    return result;
+}
+
+cartController.updateCart = async (payload) => {
+    let result;
+    await cartModel.updateOne( { productId: payload.productId, userId: payload.user.userId }, { quantity: payload.quantity })
+        .then((res) => {
+            result = helpers.createSuccessResponse(MESSAGES.SUCCESS, res)
+        })
+        .catch((err) => {
+            result = helpers.createErrorResponse(err.message, ERROR_TYPES.BAD_REQUEST)
+        })
+    return result;
+}
+
+cartController.deleteCartItem = async (payload) => {
+    let result;
+    await dbService.deleteOne(cartModel, { productId: payload.productId, userId: payload.user.userId })
         .then((res) => {
             result = helpers.createSuccessResponse(MESSAGES.SUCCESS, res)
         })

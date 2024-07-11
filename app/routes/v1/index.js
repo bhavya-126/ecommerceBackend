@@ -8,7 +8,9 @@ const v1Routes = [
   ...require('./userRoutes'),
   ...require('./productRoutes'),
   ...require('./cartRoutes'),
-  ...require('./orderRoutes')
+  ...require('./orderRoutes'),
+  ...require('./reviewRoutes'),
+  ...require('./dashboardRoutes')
 ];
 
 module.exports = v1Routes;

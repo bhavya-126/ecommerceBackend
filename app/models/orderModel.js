@@ -11,6 +11,13 @@ let orderSchema = new Schema({
     userId: {
         type: Schema.Types.ObjectId
     },
+    address: {
+        houseNo: { type: String },
+        area: { type: String },
+        city: { type: String },
+        state: { type: String },
+        pincode: { type: Number },
+    },
 }, {
     timestamps: true,
     versionKey: false,

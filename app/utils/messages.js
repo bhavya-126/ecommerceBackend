@@ -32,6 +32,8 @@ module.exports = {
     USER_UPDATED_SUCCESSFULLY: 'User updated profile information successfully.',
     FILE_REQUIRED_IN_PAYLOAD: 'File required in payload.',
     FILE_UPLOADED_SUCCESSFULLY: 'File uploaded successfully.',
+    ORDER_PLACED: "order placed successfully",
+    ORDER_UPDATED: "Your order has been updated successfully",
     NUMBER_NOT_EXIST: 'Given mobile number is not registered.',
     NUMBER_ALREADY_EXIST: 'This number has been already registerd.',
     OTP_EXPIRED: 'Your time has expired.',
@@ -40,6 +42,8 @@ module.exports = {
     FORGOT_PASSWORD_EMAIL_SENT_SUCCESSFULLY: 'Forget password email sent successfully',
     ALREADY_IN_WISHLIST: "already in wishlist",
     REMOVED_FROM_WISHLIST: "removed from wishlist",
+    REVIEW_ADDED: "review added successfully",
+    OUT_OF_STOCK: "out of stock",
     SOCKET: {
         USER_CONNECTED_SUCCESSFULLY: 'Users Connected successfully',
         USER_DISCONNECT: 'User disconnected',

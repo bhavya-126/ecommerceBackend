@@ -12,6 +12,11 @@ let orderDetailSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: orderModel
     },
+    status: {
+        type: String,
+        enum: ['pending', 'completed', 'cancelled'],
+        default: 'pending'
+    },
     productId: {
         type: Schema.Types.ObjectId,
         ref: productModel

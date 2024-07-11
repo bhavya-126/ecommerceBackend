@@ -4,7 +4,8 @@ const helpers = require('../helpers');
 const { userModel, otpModel, productModel, wishlistModel } = require('../models');
 const { MESSAGES, ERROR_TYPES } = require('../utils/constants');
 const commonFunctions = require('../utils/utils');
-const { dbService, sendEmail } = require('./../services')
+const { dbService, sendEmail } = require('./../services');
+const { Mongoose } = require('mongoose');
 
 let userController = {}
 
@@ -14,8 +15,18 @@ userController.login = async (payload) => {
         return helpers.createErrorResponse(MESSAGES.INVALID_EMAIL, ERROR_TYPES.BAD_REQUEST)
     }
     if (commonFunctions.compareHash(payload.password, user.password)) {
-
-        return helpers.createSuccessResponse(MESSAGES.LOGGED_IN_SUCCESSFULLY, { token: commonFunctions.encryptJwt({ userId: user._id, email: user.email, user: user.name, role: user.role }) })
+        let userData = { userId: user._id, email: payload.email, name: user.name, }
+        if (!user.isVerified) {
+            let otp = otpGenerator.generate(6, {
+                upperCaseAlphabets: false,
+                lowerCaseAlphabets: false,
+                specialChars: false,
+            })
+            dbService.create(otpModel, { userId: user._id, otp })
+            sendEmail(user.email, otp)
+            return helpers.createErrorResponse(MESSAGES.VERIFY_EMAIL_BEFORE_LOGIN, ERROR_TYPES.UNAUTHORIZED, { ...userData })
+        }
+        return helpers.createSuccessResponse(MESSAGES.LOGGED_IN_SUCCESSFULLY, { token: commonFunctions.encryptJwt({ userId: user._id, email: user.email, user: user.name, role: user.role }), role: user.role })
     } else {
         return helpers.createErrorResponse(MESSAGES.INVALID_PASSWORD, ERROR_TYPES.BAD_REQUEST)
     }
@@ -23,7 +34,7 @@ userController.login = async (payload) => {
 
 userController.registerUser = async (payload) => {
     let result;
-    await dbService.create(userModel, { name: payload.name, email: payload.email, password: commonFunctions.hashPassword(payload.password), role: payload.role })
+    await dbService.create(userModel, { name: payload.name, email: payload.email, password: commonFunctions.hashPassword(payload.password), mobile: payload.mobile, role: payload.role })
         .then((res) => {
             let user = { userId: res._id, email: payload.email, name: payload.name }
             let otp = otpGenerator.generate(6, {
@@ -82,10 +93,14 @@ userController.getProfile = async (payload) => {
 }
 
 userController.wishlistItem = async (payload) => {
+    console.log(payload);
     let userId = payload.user.userId;
     let productId = payload.productId;
+    let pageNo = Number(payload.pageNo);
+    let limit = Number(payload.limit);
     let result;
     await dbService.find(wishlistModel, { userId, productId })
+
         .then(async (res) => {
             if (res.length > 0) {
                 await wishlistModel.deleteOne({ userId, productId })
@@ -105,6 +120,26 @@ userController.wishlistItem = async (payload) => {
 userController.getWishlist = async (payload) => {
     let userId = payload.user.userId;
     let wishlist, result;
+    let count = await dbService.count(wishlistModel, { userId })
+
+    // await wishlistModel.aggregate([
+    //     {
+    //         $match: {
+    //             userId: Mongoose.Types.ObjectId(userId),
+    //             productId: Mongoose.Types.ObjectId(productId)
+    //         }
+    //     },
+    //     {
+    //         $sort: { createdAt: -1 }
+    //     },
+    //     {
+    //         $skip: pageNo * limit
+    //     },
+    //     {
+    //         $limit: limit
+    //     }
+    // ])
+
 
     await wishlistModel.find({ userId }, { _id: 0, productId: 1, })
         .populate('productId')
@@ -113,7 +148,7 @@ userController.getWishlist = async (payload) => {
             res.forEach((item) => {
                 wishlist.push(item.productId)
             })
-            result = helpers.createSuccessResponse(MESSAGES.SUCCESS, wishlist)
+            result = helpers.createSuccessResponse(MESSAGES.SUCCESS, { product: wishlist, count })
         })
         .catch((err) => {
             result = helpers.createErrorResponse(err.message, ERROR_TYPES.BAD_REQUEST)

@@ -13,16 +13,6 @@ module.exports = [
             group: 'order',
             description: 'Place Order',
             model: 'PlaceOrder',
-            body: {
-                items: Joi.array()
-                    .items(Joi.object({
-                        productId: Joi.string().required(),
-                        quantity: Joi.number().required(),
-                        mrp: Joi.number().required(),
-                        discount: Joi.number().required()
-                    }))
-                    .required()
-            },
             headers: {
                 authorization: Joi.string().required()
             }
@@ -38,10 +28,42 @@ module.exports = [
             group: 'order',
             description: 'Get Orders',
             model: 'GetOrders',
+            query: {
+                pageNo: Joi.number().required(),
+                limit: Joi.number().default(5)
+            },
             headers: {
                 authorization: Joi.string().required()
             }
         },
         handler: orderController.getOrderHistory
+    },
+    {
+        method: 'PUT',
+        path: '/order',
+        auth: true,
+        adminAuth: false,
+        joiSchemaForSwagger: {
+            group: 'order',
+            description: 'update Orders',
+            model: 'updateOrders',
+            headers: {
+                authorization: Joi.string().required()
+            },
+            body: {
+                status: Joi.string(),
+                address: Joi.object({
+                    houseNo: Joi.string().required(),
+                    area: Joi.string().required(),
+                    city: Joi.string().required(),
+                    state: Joi.string().required(),
+                    pincode: Joi.number().required()
+                })
+            },
+            query: {
+                orderId: Joi.string().objectId().required()
+            }
+        },
+        handler: orderController.updateOrder
     }
 ]

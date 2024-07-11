@@ -10,5 +10,7 @@ module.exports = {
     userController: require('./userController'),
     productController: require('./productController'),
     cartController: require('./cartController'),
-    orderController: require('./orderController')
+    orderController: require('./orderController'),
+    reviewController: require('./reviewController'),
+    dashboardController: require('./dashboardControllers')
 };

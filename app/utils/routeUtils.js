@@ -16,7 +16,6 @@ const HELPERS = require('../helpers');
 const utils = require('./utils');
 const helpers = require('../helpers');
 
-
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, './public');

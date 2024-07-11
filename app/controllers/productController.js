@@ -6,7 +6,7 @@ const { productModel, categoryModel } = require('./../models')
 const { pipeline } = require('nodemailer/lib/xoauth2')
 
 const productController = {}
-const getProdPipeline = (userId) => {
+const getProdPipeline = (userId, pageNo) => {
     return [
         {
             $lookup: {
@@ -80,6 +80,7 @@ const getProdPipeline = (userId) => {
                 category: { $cond: [1, '$category.name', ''] },
                 description: 1,
                 imageUrl: 1,
+                totalQuantity: 1,
                 details: 1,
                 wishlist: {
                     $cond: {
@@ -100,6 +101,15 @@ const getProdPipeline = (userId) => {
                     }
                 },
             }
+        },
+        {
+            $sort: { createdAt: -1}
+        },
+        {
+            $skip: pageNo * 5
+        },
+        {
+            $limit: 5
         }
     ]
 }
@@ -175,27 +185,38 @@ productController.getProducts = async (payload) => {
     let result;
     let user = payload.user;
     let search = payload.searchTxt;
-    let pipeline = getProdPipeline(user.userId)
+    let pageNo = Number(payload.pageNo) ;
+    let pipeline = getProdPipeline(user.userId, pageNo)
+    let productCount = await dbService.count(productModel)
     if (user.role == 'admin') {
-        await dbService.find(productModel)
+        await productModel.aggregate([
+            {
+                $skip: pageNo * 5
+            },
+            {
+                $limit: 5
+            }
+        ])
             .then((res) => {
-                result = helpers.createSuccessResponse(MESSAGES.SUCCESS, res)
+                result = helpers.createSuccessResponse(MESSAGES.SUCCESS, { product: res, productCount })
             })
             .catch((err) => {
                 result = helpers.createErrorResponse(err.message, ERROR_TYPES.BAD_REQUEST)
             })
     } else if (search) {
+
         await productModel.aggregate([...matchTxtPipeline(search), ...pipeline])
             .then((res) => {
-                result = helpers.createSuccessResponse(MESSAGES.SUCCESS, res)
+                result = helpers.createSuccessResponse(MESSAGES.SUCCESS, { product: res, productCount })
             })
             .catch((err) => {
                 result = helpers.createErrorResponse(err.message, ERROR_TYPES.BAD_REQUEST)
             })
     } else {
+
         await productModel.aggregate(pipeline)
             .then((res) => {
-                result = helpers.createSuccessResponse(MESSAGES.SUCCESS, res)
+                result = helpers.createSuccessResponse(MESSAGES.SUCCESS, { product: res, productCount })
             })
             .catch((err) => {
                 result = helpers.createErrorResponse(err.message, ERROR_TYPES.BAD_REQUEST)
@@ -205,12 +226,5 @@ productController.getProducts = async (payload) => {
 
 }
 
-productController.searchProduct = async (payload) => {
-    let result;
-    let user = payload.user;
-    let search = payload.search;
-
-    return result;
-}
 
 module.exports = productController
